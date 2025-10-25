@@ -2,6 +2,9 @@
 
 A PyTorch implementation of MDAS-GNN for predicting traffic accident risks on urban road networks.
 
+> **Note:** This project is currently under active development. We are still working on improvements and updates.
+
+
 ## Overview
 
 MDAS-GNN models traffic accident risk through three complementary perspectives:
