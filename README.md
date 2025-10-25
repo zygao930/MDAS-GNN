@@ -36,19 +36,6 @@ For background training:
 nohup python -u train_MDASGNN.py --config configurations/accident.conf --cuda=0 > accident.out &
 ```
 
-## Project Structure
-
-```
-├── MDASGNN.py              # Model architecture
-├── npz.py                  # Data preprocessing
-├── prepareData.py          # Generate train/val/test splits
-├── train_MDASGNN.py        # Training script
-├── utils.py                # Utility functions
-├── metrics.py              # Evaluation metrics
-└── configurations/
-    └── accident.conf       # Configuration file
-```
-
 ## Requirements
 
 ```
