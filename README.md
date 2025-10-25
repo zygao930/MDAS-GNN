@@ -1,44 +1,37 @@
-# MDAS-GNN: Multi-Dimensional Adaptive Spatial-Graph Neural Network
+# MDAS-GNN: Multi-Dimensional Spatiotemporal Graph Neural Network
 
-A PyTorch implementation of MDAS-GNN for spatio-temporal prediction tasks, particularly focused on traffic accident risk prediction.
+A PyTorch implementation of MDAS-GNN for predicting traffic accident risks on urban road networks.
 
 ## Overview
 
-MDAS-GNN is a neural network model that combines spatial graph convolution with multi-dimensional attention mechanisms to predict future values in spatio-temporal data. The model is especially designed for predicting traffic accident risks on road networks.
+MDAS-GNN models traffic accident risk through three complementary perspectives:
+- **Traffic Safety Risk**: Historical accident patterns and severity
+- **Infrastructure Risk**: Road characteristics and built environment
+- **Environmental Risk**: Weather, lighting, and temporal conditions
 
-## Features
-
-- **Multi-dimensional feature processing**: Handles accident severity, infrastructure risk, and environmental risk
-- **Spatial-temporal modeling**: Combines GCN with transformer-style attention
-- **Flexible temporal dependencies**: Supports weekly, daily, and hourly patterns
-- **Adaptive attention**: Feature-specific spatial attention mechanisms
+The model uses spatial diffusion to understand how risks propagate through road networks, combined with attention mechanisms to capture temporal patterns.
 
 ## Quick Start
 
-### 1. Data Preparation
-
-First, prepare your accident data:
+### 1. Preprocess Data
 
 ```bash
 python npz.py
 ```
 
-Then generate the training dataset:
+### 2. Prepare Training Data
 
 ```bash
 python prepareData.py --config configurations/accident.conf
 ```
 
-### 2. Training
-
-Train the model:
+### 3. Train Model
 
 ```bash
 python train_MDASGNN.py --config configurations/accident.conf --cuda=0
 ```
 
 For background training:
-
 ```bash
 nohup python -u train_MDASGNN.py --config configurations/accident.conf --cuda=0 > accident.out &
 ```
@@ -46,69 +39,30 @@ nohup python -u train_MDASGNN.py --config configurations/accident.conf --cuda=0 
 ## Project Structure
 
 ```
-├── MDASGNN.py           # Main model implementation
-├── train_MDASGNN.py     # Training script
-├── prepareData.py       # Data preprocessing
-├── npz.py              # Data preparation from raw sources
-├── utils.py            # Utility functions
-├── metrics.py          # Evaluation metrics
-├── configurations/
-│   └── accident.conf   # Configuration file
-└── data/
-    ├── accident/       # Accident data
-    └── processed/      # Processed data
+├── MDASGNN.py              # Model architecture
+├── npz.py                  # Data preprocessing
+├── prepareData.py          # Generate train/val/test splits
+├── train_MDASGNN.py        # Training script
+├── utils.py                # Utility functions
+├── metrics.py              # Evaluation metrics
+└── configurations/
+    └── accident.conf       # Configuration file
 ```
-
-## Configuration
-
-Key parameters in `accident.conf`:
-
-- **Data Settings**:
-  - `num_of_vertices`: Number of road segments (2144 for Central London)
-  - `points_per_hour`: Time resolution (12 = 5-minute intervals)
-  - `num_for_predict`: Prediction horizon
-
-- **Model Settings**:
-  - `num_layers`: Number of attention layers
-  - `d_model`: Model dimension
-  - `nb_head`: Number of attention heads
-  - `encoder_input_size`: Input feature dimensions (3)
-
-- **Training Settings**:
-  - `batch_size`: Training batch size
-  - `learning_rate`: Learning rate
-  - `epochs`: Training epochs
-
-## Data Format
-
-The model expects data in the following format:
-
-- **Input**: `(batch_size, num_nodes, time_steps, features)`
-- **Features**: 
-  - Accident Severity Intensity
-  - Infrastructure Risk
-  - Environmental Risk
-- **Output**: Predicted values for next time steps
 
 ## Requirements
 
-- PyTorch
-- NumPy
-- Pandas
-- Scikit-learn
-- GeoPandas (for spatial data processing)
-- TensorboardX (for logging)
+```
+torch>=1.9.0
+numpy>=1.19.0
+pandas>=1.2.0
+scipy>=1.6.0
+scikit-learn>=0.24.0
+```
 
-## Model Architecture
+## Key Features
 
-MDASGNN combines:
-
-1. **Spatial Graph Convolution**: Captures spatial dependencies between road segments
-2. **Multi-Head Attention**: Models temporal dependencies and feature interactions
-3. **Feature-Specific Processing**: Separate attention mechanisms for different risk factors
-4. **Encoder-Decoder Structure**: Flexible prediction horizon
-
-## Results
-
-The model outputs predictions for accident risk at each road segment for the specified time horizon. Evaluation uses standard metrics including MAE, RMSE, and MAPE.
+- Multi-dimensional risk modeling with feature-specific spatial diffusion
+- Encoder-decoder architecture with attention mechanisms
+- Weekly temporal aggregation for improved prediction stability
+- Flexible configuration for different prediction horizons
 
