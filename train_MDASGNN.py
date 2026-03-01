@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+# coding: utf-8
 import sys
 import torch
 import torch.nn as nn
@@ -15,6 +16,17 @@ from tensorboardX import SummaryWriter
 import random
 import numpy as np
 import torch
+
+# Set seeds for reproducibility
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+# Call this before training
+set_seed(42)
 
 # read hyper-param settings
 parser = argparse.ArgumentParser()
@@ -169,6 +181,7 @@ def train_main():
 
         # apply model on the validation data set
         val_loss = compute_val_loss(net, val_loader, criterion, sw, epoch)
+        print('epoch: %s, validation loss: %.6f' % (epoch, val_loss), flush=True)
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -179,6 +192,8 @@ def train_main():
         net.train()  # ensure dropout layers are in train mode
 
         train_start_time = time()
+        total_loss = 0
+        num_batches = 0
 
         for batch_index, batch_data in enumerate(train_loader):
             encoder_inputs, decoder_inputs, labels = batch_data
@@ -192,9 +207,17 @@ def train_main():
             loss.backward()
             optimizer.step()
             training_loss = loss.item()
+            total_loss += training_loss
+            num_batches += 1
             global_step += 1
             sw.add_scalar('training_loss', training_loss, global_step)
+            
+            # 每10个batch打印一次损失
+            if batch_index % 10 == 0:
+                print('epoch: %s, batch: %d/%d, loss: %.6f' % (epoch, batch_index, len(train_loader), training_loss), flush=True)
 
+        avg_loss = total_loss / num_batches
+        print('epoch: %s, average training loss: %.6f' % (epoch, avg_loss), flush=True)
         print('epoch: %s, train time every whole data:%.2fs' % (epoch, time() - train_start_time), flush=True)
         print('epoch: %s, total time:%.2fs' % (epoch, time() - start_time), flush=True)
 
@@ -210,6 +233,8 @@ def train_main():
         params_filename = os.path.join(params_path, 'epoch_%s.params' % epoch)
         net.train()  # ensure dropout layers are in train mode
         train_start_time = time()
+        total_loss = 0
+        num_batches = 0
 
         for batch_index, batch_data in enumerate(train_loader):
             encoder_inputs, decoder_inputs, labels = batch_data
@@ -235,15 +260,24 @@ def train_main():
             loss.backward()
             optimizer.step()
             training_loss = loss.item()
+            total_loss += training_loss
+            num_batches += 1
             global_step += 1
 
             sw.add_scalar('training_loss', training_loss, global_step)
+            
+            # 每10个batch打印一次损失
+            if batch_index % 10 == 0:
+                print('fine tune - epoch: %s, batch: %d/%d, loss: %.6f' % (epoch, batch_index, len(train_loader), training_loss), flush=True)
 
-        print('epoch: %s, train time every whole data:%.2fs' % (epoch, time() - train_start_time), flush=True)
-        print('epoch: %s, total time:%.2fs' % (epoch, time() - start_time), flush=True)
+        avg_loss = total_loss / num_batches
+        print('fine tune - epoch: %s, average training loss: %.6f' % (epoch, avg_loss), flush=True)
+        print('fine tune - epoch: %s, train time every whole data:%.2fs' % (epoch, time() - train_start_time), flush=True)
+        print('fine tune - epoch: %s, total time:%.2fs' % (epoch, time() - start_time), flush=True)
 
         # apply model on the validation data set
         val_loss = compute_val_loss(net, val_loader, criterion, sw, epoch)
+        print('fine tune - epoch: %s, validation loss: %.6f' % (epoch, val_loss), flush=True)
 
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -263,3 +297,5 @@ def predict_main(epoch, data_loader, data_target_tensor, _max, _min, type):
     net.load_state_dict(torch.load(params_filename))
     predict_and_save_results(net, data_loader, data_target_tensor, epoch, _max, _min, params_path, type)
 
+if __name__ == "__main__":
+    train_main()
