@@ -206,7 +206,27 @@ def trans_norm_Adj(W):
     
     return trans_norm_Adj_matrix
 
-
+def norm_Adj(W):
+    """
+    Compute symmetric normalized adjacency matrix: D^(-1/2) * (W + I) * D^(-1/2)
+    
+    Parameters:
+        W: adjacency matrix (N, N)
+        
+    Returns:
+        Symmetric normalized adjacency matrix (N, N)
+    """
+    assert W.shape[0] == W.shape[1]
+    
+    N = W.shape[0]
+    W = W + np.identity(N)  # Add self-connections
+    D = np.sum(W, axis=1)
+    D = np.clip(D, 1e-10, None)  # Avoid division by zero
+    D_inv_sqrt = np.diag(1.0 / np.sqrt(D))
+    norm_Adj_matrix = np.dot(np.dot(D_inv_sqrt, W), D_inv_sqrt)
+    
+    return norm_Adj_matrix
+    
 def compute_val_loss(net, val_loader, criterion, sw, epoch):
     """
     Compute validation loss for the model
