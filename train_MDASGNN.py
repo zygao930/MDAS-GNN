@@ -12,7 +12,6 @@ import configparser
 from model.MDASGNN import *
 from lib.utils import get_adjacency_matrix, get_adjacency_matrix_2direction, compute_val_loss, predict_and_save_results, load_graphdata_normY_channel1
 from tensorboardX import SummaryWriter
-from lib.visual import extract_coupling_coefficients, plot_coupling_evolution, plot_3d_coupling_surface, plot_radial_training, plot_comprehensive_training_dashboard
 import random
 import numpy as np
 import torch
@@ -26,8 +25,6 @@ os.environ["CUDA_VISIBLE_DEVICES"] = args.cuda
 USE_CUDA = torch.cuda.is_available()
 DEVICE = torch.device('cuda:0')
 print("CUDA:", USE_CUDA, DEVICE, flush=True)
-static_features = np.load('data/static_conditions_features.npy')  
-static_features = torch.tensor(static_features, dtype=torch.float32).to(DEVICE)
 
 config = configparser.ConfigParser()
 print('Read configuration file: %s' % (args.config), flush=True)
