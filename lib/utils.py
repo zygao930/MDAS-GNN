@@ -249,6 +249,10 @@ def compute_val_loss(net, val_loader, criterion, sw, epoch):
         
         for batch_index, batch_data in enumerate(val_loader):
             encoder_inputs, decoder_inputs, labels = batch_data
+            device = next(net.parameters()).device
+            encoder_inputs = encoder_inputs.to(device)
+            decoder_inputs = decoder_inputs.to(device)
+            labels = labels.to(device)
             encoder_inputs = encoder_inputs.transpose(-1, -2)  # (B, N, T, F)
             decoder_inputs = decoder_inputs.unsqueeze(-1)  # (B, N, T, 1)
             labels = labels.unsqueeze(-1)  # (B, N, T, 1)
@@ -305,6 +309,10 @@ def predict_and_save_results(net, data_loader, data_target_tensor, epoch, _max, 
         
         for batch_index, batch_data in enumerate(data_loader):
             encoder_inputs, decoder_inputs, labels = batch_data
+            device = next(net.parameters()).device
+            encoder_inputs = encoder_inputs.to(device)
+            decoder_inputs = decoder_inputs.to(device)
+            labels = labels.to(device)
             
             encoder_inputs = encoder_inputs.transpose(-1, -2)  # (B, N, T, F)
             decoder_inputs = decoder_inputs.unsqueeze(-1)  # (B, N, T, 1)
